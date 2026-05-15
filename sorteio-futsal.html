@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Sorteio de Times de Futsal - Roleta de Coletes</title>
+  <meta content="Ferramenta rápida para sortear times de futsal pelas cores dos coletes." name="description">
+  <meta content="futsal, sorteio, times, coletes, roleta" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/cropped-cropped-fragoso-software-m-4-32x32.png" rel="icon">
+  <link href="assets/img/cropped-cropped-fragoso-software-m-4-32x32.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+
+  <style>
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .color-option {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+    .color-option input { display: none; }
+    .color-option .color-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      background: #fff;
+      transition: all .2s;
+    }
+    .color-option input:checked + .color-card {
+      border-color: #149ddd;
+      box-shadow: 0 0 0 3px rgba(20,157,221,.18);
+      background: #f0f9ff;
+    }
+    .color-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #444;
+      flex-shrink: 0;
+    }
+    .color-card span { font-weight: 600; font-size: .95rem; }
+
+    #wheel-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #wheel-canvas {
+      max-width: 100%;
+      height: auto;
+      cursor: pointer;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
+      transition: transform .2s;
+    }
+    #wheel-canvas:hover { transform: scale(1.01); }
+    #wheel-canvas.spinning { cursor: not-allowed; }
+
+    .player-counter {
+      background: linear-gradient(135deg, #149ddd, #16a085);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(20,157,221,.3);
+    }
+    .player-counter strong { font-size: 1.4rem; }
+
+    .team-card {
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    }
+    .team-card.text-dark { color: #1a1a1a !important; }
+    .team-card .team-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .team-card .badge-order {
+      background: rgba(0,0,0,.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: .85rem;
+    }
+    .team-card.text-dark .badge-order { background: rgba(255,255,255,.5); }
+    .team-card .player-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .team-card .player-list li {
+      padding: 4px 0;
+      font-weight: 500;
+    }
+    .team-card.leftover {
+      border: 3px dashed #fff;
+      position: relative;
+    }
+    .team-card.leftover::after {
+      content: "FILA / ÚLTIMO A JOGAR";
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: rgba(0,0,0,.35);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .team-card.leftover.text-dark::after { background: rgba(255,255,255,.5); }
+
+    .match-card {
+      background: #fff;
+      border-left: 5px solid #149ddd;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .match-card .match-order {
+      background: #149ddd;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .match-card .vs {
+      font-weight: 700;
+      color: #777;
+      margin: 0 6px;
+    }
+    .color-chip {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: .95rem;
+      border: 2px solid #444;
+    }
+
+    .step-section { display: none; }
+    .step-section.active { display: block; }
+
+    .btn-spin {
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      color: #fff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(255,107,53,.4);
+      transition: all .25s;
+    }
+    .btn-spin:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(255,107,53,.5);
+      color: #fff;
+    }
+    .btn-spin:disabled { opacity: .55; cursor: not-allowed; }
+
+    .info-box {
+      background: #f0f9ff;
+      border-left: 4px solid #149ddd;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 18px;
+      font-size: .95rem;
+    }
+  </style>
+
+  <!-- =======================================================
+  * Template Name: MyResume
+  * Template URL: https://bootstrapmade.com/free-html-bootstrap-template-my-resume/
+  * Updated: Jun 29 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="starter-page-page">
+
+  <header id="header" class="header d-flex flex-column justify-content-center">
+
+    <i class="header-toggle d-xl-none bi bi-list"></i>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html#hero"><i class="bi bi-house navicon"></i><span>Início</span></a></li>
+        <li><a href="index.html#about"><i class="bi bi-person navicon"></i><span>Sobre</span></a></li>
+        <li><a href="index.html#resume"><i class="bi bi-file-earmark-text navicon"></i><span>Currículo</span></a></li>
+        <li><a href="index.html#portfolio"><i class="bi bi-images navicon"></i><span>Portfólio</span></a></li>
+        <li><a href="index.html#services"><i class="bi bi-hdd-stack navicon"></i><span>Serviços</span></a></li>
+        <li><a href="index.html#contact"><i class="bi bi-envelope navicon"></i><span>Contato</span></a></li>
+      </ul>
+    </nav>
+
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title" data-aos="fade">
+      <div class="container">
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="index.html">Home</a></li>
+            <li class="current">Sorteio de Times de Futsal</li>
+          </ol>
+        </nav>
+        <h1>Roleta de Coletes - Sorteio de Times</h1>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container" data-aos="fade-up">
+
+        <!-- ============ STEP 1: CONFIGURAÇÃO ============ -->
+        <div id="step-setup" class="step-section active">
+
+          <div class="container section-title" data-aos="fade-up">
+            <h2>Configuração</h2>
+            <p>Informe a quantidade de jogadores e marque as cores de coletes disponíveis.</p>
+          </div>
+
+          <div class="info-box">
+            <i class="bi bi-info-circle"></i>
+            <strong>Como funciona:</strong> a ferramenta calcula quantos times é possível formar.
+            Se sobrarem jogadores, eles formam um time incompleto que será <strong>o último a jogar</strong>.
+            Suas escolhas ficam salvas no navegador por <strong>2 horas</strong>.
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Quantidade de jogadores disponíveis</label>
+              <input type="number" id="totalPlayers" class="form-control form-control-lg" min="2" max="50" placeholder="Ex: 16">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Jogadores por equipe</label>
+              <input type="number" id="playersPerTeam" class="form-control form-control-lg" min="2" max="11" placeholder="Ex: 5">
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="form-label fw-bold">Cores de coletes disponíveis</label>
+            <div class="color-grid" id="colorGrid"></div>
+          </div>
+
+          <div id="setupPreview" class="info-box mt-4" style="display:none;"></div>
+
+          <div class="text-center mt-4">
+            <button id="btnStart" class="btn btn-spin">
+              <i class="bi bi-play-circle"></i> Iniciar Sorteio
+            </button>
+          </div>
+        </div>
+
+        <!-- ============ STEP 2: ROLETA ============ -->
+        <div id="step-wheel" class="step-section">
+
+          <div class="container section-title" data-aos="fade-up">
+            <h2>Hora do Sorteio!</h2>
+            <p>Clique na roleta. Quando ela parar, pegue o colete da cor indicada.</p>
+          </div>
+
+          <div class="row align-items-center">
+            <div class="col-lg-7 mb-4 mb-lg-0">
+              <div id="wheel-wrapper">
+                <canvas id="wheel-canvas" width="500" height="500"></canvas>
+                <button id="btnSpin" class="btn btn-spin">
+                  <i class="bi bi-arrow-clockwise"></i> Girar Roleta
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="player-counter text-center mb-3">
+                Jogador atual: <strong id="currentPlayerNum">1</strong> de <strong id="totalPlayersDisplay">0</strong>
+              </div>
+              <h5 class="mb-3"><i class="bi bi-list-check"></i> Times em formação</h5>
+              <div id="liveTeams"></div>
+              <button id="btnReset" class="btn btn-outline-secondary btn-sm mt-3">
+                <i class="bi bi-arrow-counterclockwise"></i> Recomeçar do zero
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ STEP 3: RESULTADO ============ -->
+        <div id="step-result" class="step-section">
+
+          <div class="container section-title" data-aos="fade-up">
+            <h2>Times Formados!</h2>
+            <p>Confira a ordem de jogo e a composição de cada time.</p>
+          </div>
+
+          <h4 class="mb-3"><i class="bi bi-trophy"></i> Ordem das Partidas</h4>
+          <div id="matchOrder" class="mb-4"></div>
+
+          <h4 class="mb-3"><i class="bi bi-people-fill"></i> Composição dos Times</h4>
+          <div id="finalTeams" class="row"></div>
+
+          <div class="text-center mt-4">
+            <button id="btnNewGame" class="btn btn-spin">
+              <i class="bi bi-arrow-repeat"></i> Novo Sorteio
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer" class="footer position-relative light-background">
+    <div class="container">
+      <h3 class="sitename">Esdras Fragoso da Silva Neto</h3>
+      <p>Sou um desenvolvedor Back-end com mais de 14 anos de experiência, especializado em PHP e tecnologias web. Minha missão é transformar conhecimento em soluções práticas e eficientes para impulsionar o sucesso dos projetos em que atuo.</p>
+      <div class="social-links d-flex justify-content-center">
+        <a href="https://github.com/fsdrasfragoso"><i class="bi bi-github"></i></a>
+        <a href="https://www.linkedin.com/in/esdras-fragoso-5b44a868/"><i class="bi bi-linkedin"></i></a>
+        <a href="https://www.instagram.com/esdrasfragoso/"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.facebook.com/esdras.fragoso.silva.neto"><i class="bi bi-facebook"></i></a>
+      </div>
+      <div class="container">
+        <div class="copyright">
+          <span>&copy; 2024 Esdras Fragoso</span> <strong>Todos os Direitos Reservados</strong>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/typed.js/typed.umd.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <script>
+    /* ====================================================
+       SORTEIO DE TIMES DE FUTSAL - Lógica
+       ==================================================== */
+
+    const COLORS = {
+      laranja:  { hex: '#FF8C00', name: 'Laranja',  dark: false },
+      amarelo:  { hex: '#FFD700', name: 'Amarelo',  dark: true  },
+      verde:    { hex: '#1E8449', name: 'Verde',    dark: false },
+      azul:     { hex: '#1E90FF', name: 'Azul',     dark: false },
+      vermelho: { hex: '#C0392B', name: 'Vermelho', dark: false },
+      preto:    { hex: '#1a1a1a', name: 'Preto',    dark: false },
+      roxo:     { hex: '#8E44AD', name: 'Roxo',     dark: false },
+      branco:   { hex: '#FFFFFF', name: 'Branco',   dark: true  },
+      rosa:     { hex: '#FF69B4', name: 'Rosa',     dark: false }
+    };
+
+    const COOKIE_NAME = 'sorteioFutsalConfig';
+    const COOKIE_HOURS = 2;
+
+    const state = {
+      totalPlayers: 0,
+      playersPerTeam: 0,
+      selectedColors: [],
+      teams: [],
+      currentPlayer: 0,
+      spinning: false,
+      rotation: 0
+    };
+
+    /* ---------- Cookies ---------- */
+    function setCookie(name, value, hours) {
+      const d = new Date();
+      d.setTime(d.getTime() + hours * 60 * 60 * 1000);
+      document.cookie = name + '=' + encodeURIComponent(JSON.stringify(value)) +
+        ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+    }
+    function getCookie(name) {
+      const match = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
+      if (!match) return null;
+      try { return JSON.parse(decodeURIComponent(match.substring(name.length + 1))); }
+      catch (e) { return null; }
+    }
+
+    /* ---------- Render cor checkboxes ---------- */
+    function renderColorGrid() {
+      const grid = document.getElementById('colorGrid');
+      grid.innerHTML = '';
+      Object.entries(COLORS).forEach(([key, c]) => {
+        const label = document.createElement('label');
+        label.className = 'color-option';
+        label.innerHTML = `
+          <input type="checkbox" value="${key}">
+          <div class="color-card">
+            <span class="color-swatch" style="background:${c.hex};"></span>
+            <span>${c.name}</span>
+          </div>`;
+        grid.appendChild(label);
+      });
+    }
+
+    /* ---------- Restaurar cookie ---------- */
+    function loadSavedConfig() {
+      const saved = getCookie(COOKIE_NAME);
+      if (!saved) return;
+      if (saved.totalPlayers) document.getElementById('totalPlayers').value = saved.totalPlayers;
+      if (saved.playersPerTeam) document.getElementById('playersPerTeam').value = saved.playersPerTeam;
+      if (Array.isArray(saved.selectedColors)) {
+        saved.selectedColors.forEach(col => {
+          const cb = document.querySelector(`#colorGrid input[value="${col}"]`);
+          if (cb) cb.checked = true;
+        });
+      }
+      updatePreview();
+    }
+
+    function getSelectedColors() {
+      return Array.from(document.querySelectorAll('#colorGrid input:checked')).map(i => i.value);
+    }
+
+    function updatePreview() {
+      const tp = parseInt(document.getElementById('totalPlayers').value) || 0;
+      const ppt = parseInt(document.getElementById('playersPerTeam').value) || 0;
+      const cols = getSelectedColors();
+      const box = document.getElementById('setupPreview');
+      if (!tp || !ppt) { box.style.display = 'none'; return; }
+
+      const fullTeams = Math.floor(tp / ppt);
+      const leftover = tp % ppt;
+      const totalTeams = fullTeams + (leftover > 0 ? 1 : 0);
+
+      let html = `<strong>Prévia:</strong> ${fullTeams} time(s) completo(s) de ${ppt}`;
+      if (leftover > 0) html += ` + 1 time incompleto com ${leftover} jogador(es) (último a jogar)`;
+      html += `. Total: <strong>${totalTeams} times</strong>.`;
+      if (cols.length < totalTeams) {
+        html += `<br><span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Você precisa marcar pelo menos ${totalTeams} cores (marcou ${cols.length}).</span>`;
+      } else {
+        html += `<br><span class="text-success"><i class="bi bi-check-circle"></i> Cores suficientes selecionadas (${cols.length}).</span>`;
+      }
+      box.innerHTML = html;
+      box.style.display = 'block';
+    }
+
+    /* ---------- Iniciar sorteio ---------- */
+    function startDraw() {
+      const tp = parseInt(document.getElementById('totalPlayers').value) || 0;
+      const ppt = parseInt(document.getElementById('playersPerTeam').value) || 0;
+      const cols = getSelectedColors();
+
+      if (tp < 2) return Swal.fire('Ops!', 'Informe pelo menos 2 jogadores.', 'warning');
+      if (ppt < 2) return Swal.fire('Ops!', 'O time precisa ter pelo menos 2 jogadores.', 'warning');
+      if (ppt > tp) return Swal.fire('Ops!', 'Jogadores por equipe maior que o total!', 'warning');
+
+      const fullTeams = Math.floor(tp / ppt);
+      const leftover = tp % ppt;
+      const totalTeams = fullTeams + (leftover > 0 ? 1 : 0);
+
+      if (cols.length < totalTeams) {
+        return Swal.fire('Faltam cores!', `Você precisa selecionar pelo menos ${totalTeams} cores.`, 'warning');
+      }
+
+      setCookie(COOKIE_NAME, { totalPlayers: tp, playersPerTeam: ppt, selectedColors: cols }, COOKIE_HOURS);
+
+      state.totalPlayers = tp;
+      state.playersPerTeam = ppt;
+      state.selectedColors = cols;
+      state.teams = [];
+      state.currentPlayer = 0;
+      state.rotation = 0;
+
+      const shuffledColors = [...cols].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < fullTeams; i++) {
+        state.teams.push({
+          color: shuffledColors[i],
+          capacity: ppt,
+          spotsLeft: ppt,
+          players: [],
+          isLeftover: false
+        });
+      }
+      if (leftover > 0) {
+        state.teams.push({
+          color: shuffledColors[fullTeams],
+          capacity: leftover,
+          spotsLeft: leftover,
+          players: [],
+          isLeftover: true
+        });
+      }
+
+      document.getElementById('totalPlayersDisplay').textContent = tp;
+      document.getElementById('currentPlayerNum').textContent = 1;
+      switchStep('step-wheel');
+      drawWheel(0);
+      renderLiveTeams();
+    }
+
+    /* ---------- Trocar de seção ---------- */
+    function switchStep(id) {
+      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---------- Roleta canvas ---------- */
+    function getActiveTeams() {
+      return state.teams.filter(t => t.spotsLeft > 0);
+    }
+
+    function drawWheel(rotationDeg) {
+      const canvas = document.getElementById('wheel-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      const cx = W / 2, cy = H / 2;
+      const r = Math.min(W, H) / 2 - 30;
+
+      ctx.clearRect(0, 0, W, H);
+
+      const active = getActiveTeams();
+      const n = active.length;
+
+      if (n === 0) {
+        ctx.fillStyle = '#eee';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+        ctx.fill();
+        return;
+      }
+
+      const slice = (2 * Math.PI) / n;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rotationDeg * Math.PI / 180);
+
+      active.forEach((team, i) => {
+        const start = i * slice;
+        const end = start + slice;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, r, start, end);
+        ctx.closePath();
+        ctx.fillStyle = COLORS[team.color].hex;
+        ctx.fill();
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // texto
+        ctx.save();
+        ctx.rotate(start + slice / 2);
+        ctx.translate(r * 0.62, 0);
+        ctx.fillStyle = COLORS[team.color].dark ? '#000' : '#fff';
+        ctx.font = 'bold 16px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(COLORS[team.color].name.toUpperCase(), 0, -8);
+        ctx.font = '600 13px Poppins, sans-serif';
+        ctx.fillText(`vagas: ${team.spotsLeft}`, 0, 12);
+        ctx.restore();
+      });
+
+      // círculo central
+      ctx.beginPath();
+      ctx.arc(0, 0, 40, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = '#149ddd';
+      ctx.font = 'bold 22px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GIRE', 0, 0);
+
+      ctx.restore();
+
+      // ponteiro fixo no topo
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r + 5);
+      ctx.lineTo(cx - 18, cy - r - 25);
+      ctx.lineTo(cx + 18, cy - r - 25);
+      ctx.closePath();
+      ctx.fillStyle = '#dc143c';
+      ctx.fill();
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    /* ---------- Girar ---------- */
+    function spin() {
+      if (state.spinning) return;
+      const active = getActiveTeams();
+      if (active.length === 0) { showResults(); return; }
+
+      state.spinning = true;
+      document.getElementById('btnSpin').disabled = true;
+      document.getElementById('wheel-canvas').classList.add('spinning');
+
+      const winnerIdx = Math.floor(Math.random() * active.length);
+      const winner = active[winnerIdx];
+
+      const sliceDeg = 360 / active.length;
+      // O ponteiro fica em -90° (topo). Após rotação R, a fatia i ocupa [R + i*slice, R + (i+1)*slice].
+      // Queremos o centro da fatia winnerIdx no topo: R + (winnerIdx+0.5)*slice ≡ -90° (mod 360)
+      const winnerCenter = (winnerIdx + 0.5) * sliceDeg;
+      let baseTarget = -90 - winnerCenter;
+      // pequeno jitter para não parar exatamente no centro
+      baseTarget += (Math.random() - 0.5) * (sliceDeg * 0.6);
+
+      const fullSpins = 6;
+      // calcular o final passando pelo menos 6 voltas completas a partir da rotação atual
+      let currentMod = ((state.rotation % 360) + 360) % 360;
+      let targetMod = ((baseTarget % 360) + 360) % 360;
+      let delta = ((targetMod - currentMod) % 360 + 360) % 360;
+      const finalRotation = state.rotation + fullSpins * 360 + delta;
+
+      const duration = 4200;
+      const startRot = state.rotation;
+      const t0 = performance.now();
+
+      function animate(now) {
+        const elapsed = now - t0;
+        const t = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        state.rotation = startRot + (finalRotation - startRot) * eased;
+        drawWheel(state.rotation);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          state.rotation = finalRotation;
+          announceWinner(winner);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function announceWinner(team) {
+      state.currentPlayer++;
+      team.players.push(state.currentPlayer);
+      team.spotsLeft--;
+
+      const c = COLORS[team.color];
+      const textColor = c.dark ? '#000' : '#fff';
+      const borderStyle = team.color === 'branco' ? '3px solid #333' : 'none';
+
+      Swal.fire({
+        title: `Jogador ${state.currentPlayer}!`,
+        html: `
+          <div style="font-size:1.15rem; margin-bottom:14px;">Pegue o colete:</div>
+          <div style="
+            display:inline-block;
+            background:${c.hex};
+            color:${textColor};
+            padding:18px 32px;
+            border-radius:14px;
+            font-size:2rem;
+            font-weight:800;
+            letter-spacing:2px;
+            border:${borderStyle};
+            box-shadow:0 6px 16px rgba(0,0,0,.25);
+          ">${c.name.toUpperCase()}</div>
+          ${team.isLeftover ? '<div class="mt-3 text-muted small"><i class="bi bi-clock"></i> Esse será o time da fila (último a jogar).</div>' : ''}`,
+        confirmButtonText: 'OK!',
+        confirmButtonColor: '#149ddd',
+        allowOutsideClick: false
+      }).then(() => {
+        state.spinning = false;
+        document.getElementById('btnSpin').disabled = false;
+        document.getElementById('wheel-canvas').classList.remove('spinning');
+        document.getElementById('currentPlayerNum').textContent = Math.min(state.currentPlayer + 1, state.totalPlayers);
+        drawWheel(state.rotation);
+        renderLiveTeams();
+
+        if (state.currentPlayer >= state.totalPlayers) {
+          setTimeout(showResults, 400);
+        }
+      });
+    }
+
+    /* ---------- Times ao vivo ---------- */
+    function renderLiveTeams() {
+      const wrap = document.getElementById('liveTeams');
+      wrap.innerHTML = '';
+      state.teams.forEach(team => {
+        const c = COLORS[team.color];
+        const div = document.createElement('div');
+        div.className = 'team-card' + (c.dark ? ' text-dark' : '') + (team.isLeftover ? ' leftover' : '');
+        div.style.background = c.hex;
+        if (team.color === 'branco') div.style.border = '2px solid #333';
+        div.innerHTML = `
+          <div class="team-title">
+            <span>Time ${c.name}</span>
+            <span class="badge-order">${team.players.length}/${team.capacity}</span>
+          </div>
+          <ul class="player-list">
+            ${team.players.map(p => `<li><i class="bi bi-person-fill"></i> Jogador ${p}</li>`).join('') ||
+              '<li class="opacity-75"><i class="bi bi-hourglass"></i> aguardando...</li>'}
+          </ul>`;
+        wrap.appendChild(div);
+      });
+    }
+
+    /* ---------- Resultado final ---------- */
+    function showResults() {
+      const fullTeams = state.teams.filter(t => !t.isLeftover);
+      const leftover = state.teams.find(t => t.isLeftover);
+
+      // Times completos: ordem aleatória entre si para definir quem começa
+      const ordered = [...fullTeams].sort(() => Math.random() - 0.5);
+      if (leftover) ordered.push(leftover); // incompleto SEMPRE por último
+
+      // Montar lista de partidas: enfrentam-se de dois em dois conforme a fila.
+      const finalDiv = document.getElementById('finalTeams');
+      finalDiv.innerHTML = '';
+      ordered.forEach((team, idx) => {
+        const c = COLORS[team.color];
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+        let badge = '';
+        if (idx === 0 || idx === 1) badge = '<span class="badge-order">COMEÇA</span>';
+        else if (team.isLeftover) badge = '<span class="badge-order">FILA</span>';
+        else badge = `<span class="badge-order">Ordem ${idx + 1}</span>`;
+
+        col.innerHTML = `
+          <div class="team-card${c.dark ? ' text-dark' : ''}${team.isLeftover ? ' leftover' : ''}"
+               style="background:${c.hex};${team.color === 'branco' ? 'border:2px solid #333;' : ''}">
+            <div class="team-title">
+              <span>Time ${c.name}</span>
+              ${badge}
+            </div>
+            <div class="small mb-2">${team.players.length} jogador(es)</div>
+            <ul class="player-list">
+              ${team.players.map(p => `<li><i class="bi bi-person-fill"></i> Jogador ${p}</li>`).join('')}
+            </ul>
+          </div>`;
+        finalDiv.appendChild(col);
+      });
+
+      // Ordem de partidas: partidas formadas em pares
+      const matchDiv = document.getElementById('matchOrder');
+      matchDiv.innerHTML = '';
+      let matchNum = 1;
+      for (let i = 0; i + 1 < ordered.length; i += 2) {
+        const a = ordered[i], b = ordered[i + 1];
+        const cardA = chip(a), cardB = chip(b);
+        const note = (a.isLeftover || b.isLeftover) ? ' <small class="text-muted">(time incompleto)</small>' : '';
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-order">${matchNum}</div>
+          <div>
+            <strong>Partida ${matchNum}:</strong> ${cardA} <span class="vs">VS</span> ${cardB}${note}
+          </div>`;
+        matchDiv.appendChild(card);
+        matchNum++;
+      }
+      if (ordered.length % 2 === 1) {
+        const last = ordered[ordered.length - 1];
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-order"><i class="bi bi-clock"></i></div>
+          <div>
+            <strong>Na fila:</strong> ${chip(last)} aguardando próxima partida.
+            ${last.isLeftover ? '<small class="text-muted">(time incompleto — entra por último)</small>' : ''}
+          </div>`;
+        matchDiv.appendChild(card);
+      }
+
+      switchStep('step-result');
+    }
+
+    function chip(team) {
+      const c = COLORS[team.color];
+      const textColor = c.dark ? '#000' : '#fff';
+      return `<span class="color-chip" style="background:${c.hex};color:${textColor};border-color:#444;">${c.name}</span>`;
+    }
+
+    /* ---------- Reset ---------- */
+    function resetAll() {
+      Swal.fire({
+        title: 'Recomeçar?',
+        text: 'O sorteio em andamento será perdido.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sim',
+        cancelButtonText: 'Não',
+        confirmButtonColor: '#149ddd'
+      }).then(r => {
+        if (r.isConfirmed) {
+          state.teams = [];
+          state.currentPlayer = 0;
+          state.spinning = false;
+          state.rotation = 0;
+          switchStep('step-setup');
+        }
+      });
+    }
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderColorGrid();
+      loadSavedConfig();
+
+      ['totalPlayers', 'playersPerTeam'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+      });
+      document.getElementById('colorGrid').addEventListener('change', updatePreview);
+
+      document.getElementById('btnStart').addEventListener('click', startDraw);
+      document.getElementById('btnSpin').addEventListener('click', spin);
+      document.getElementById('wheel-canvas').addEventListener('click', () => {
+        if (!state.spinning) spin();
+      });
+      document.getElementById('btnReset').addEventListener('click', resetAll);
+      document.getElementById('btnNewGame').addEventListener('click', () => {
+        state.teams = [];
+        state.currentPlayer = 0;
+        state.spinning = false;
+        state.rotation = 0;
+        switchStep('step-setup');
+      });
+    });
+  </script>
+
+</body>
+</html>
