@@ -242,6 +242,7 @@ h6 {
 .navmenu a span,
 .navmenu a:focus span {
   padding: 0 5px 0 7px;
+  white-space: nowrap;
 }
 
 @media (min-width: 992px) {
