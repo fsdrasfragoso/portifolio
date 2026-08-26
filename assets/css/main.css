@@ -1458,3 +1458,96 @@ section,
 .starter-section {
   /* Add your styles here */
 }
+
+/*--------------------------------------------------------------
+# Menu lateral: nunca pode surgir barra de rolagem ao lado dele
+--------------------------------------------------------------*/
+/* O cabeçalho é fixo e ocupa a altura toda da janela. Com nove itens a lista
+   passou dessa altura e o overflow-y: auto do tema mostrava uma barra vertical
+   colada no menu. A correção é fazer o menu caber: pílulas mais baixas e, em
+   janela curta, menores ainda. O overflow escondido é só a garantia final. */
+.header {
+  overflow: hidden;
+}
+
+.navmenu a,
+.navmenu a:focus {
+  height: 48px;
+  margin-bottom: 6px;
+}
+
+.navmenu ul {
+  padding-bottom: 0;
+}
+
+@media (min-width: 992px) {
+
+  /* No desktop a pílula fica recolhida em círculo: a largura acompanha a altura. */
+  .navmenu a,
+  .navmenu a:focus {
+    max-width: 48px;
+  }
+
+  .navmenu a:hover,
+  .navmenu .active,
+  .navmenu .active:focus {
+    max-width: 100%;
+  }
+}
+
+/* Janela baixa (notebook pequeno, celular deitado). */
+@media (max-height: 700px) {
+
+  .navmenu a,
+  .navmenu a:focus {
+    height: 40px;
+    margin-bottom: 4px;
+  }
+
+  .navmenu a i,
+  .navmenu a:focus i {
+    font-size: 17px;
+  }
+
+  @media (min-width: 992px) {
+
+    .navmenu a,
+    .navmenu a:focus {
+      max-width: 40px;
+    }
+
+    .navmenu a:hover,
+    .navmenu .active,
+    .navmenu .active:focus {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-height: 560px) {
+
+  .navmenu a,
+  .navmenu a:focus {
+    height: 34px;
+    margin-bottom: 3px;
+  }
+
+  .navmenu a i,
+  .navmenu a:focus i {
+    font-size: 15px;
+  }
+
+  @media (min-width: 992px) {
+
+    .navmenu a,
+    .navmenu a:focus {
+      max-width: 34px;
+    }
+
+    .navmenu a:hover,
+    .navmenu .active,
+    .navmenu .active:focus {
+      max-width: 100%;
+    }
+  }
+}
