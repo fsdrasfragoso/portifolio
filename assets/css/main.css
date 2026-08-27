@@ -1496,7 +1496,6 @@ section,
   }
 
   .header .navmenu ul li a:hover,
-  .header .navmenu ul li.active > a,
   .header .navmenu ul li:hover > a {
     max-width: 100%;
   }
