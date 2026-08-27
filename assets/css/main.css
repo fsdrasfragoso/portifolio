@@ -1462,92 +1462,42 @@ section,
 /*--------------------------------------------------------------
 # Menu lateral: nunca pode surgir barra de rolagem ao lado dele
 --------------------------------------------------------------*/
-/* O cabeçalho é fixo e ocupa a altura toda da janela. Com nove itens a lista
+/* O cabecalho e fixo e ocupa a altura toda da janela. Com nove itens a lista
    passou dessa altura e o overflow-y: auto do tema mostrava uma barra vertical
-   colada no menu. A correção é fazer o menu caber: pílulas mais baixas e, em
-   janela curta, menores ainda. O overflow escondido é só a garantia final. */
+   colada no menu. A correcao e o menu caber sempre: a pilula encolhe junto com
+   a janela (clamp), em vez de depender de breakpoints. O seletor e mais
+   especifico que o do tema de proposito, para nao depender da ordem do arquivo.
+   O overflow escondido e so a garantia final. */
 .header {
   overflow: hidden;
 }
 
-.navmenu a,
-.navmenu a:focus {
-  height: 48px;
-  margin-bottom: 6px;
+.header .navmenu ul {
+  padding-bottom: 0;
 }
 
-.navmenu ul {
-  padding-bottom: 0;
+.header .navmenu ul li a,
+.header .navmenu ul li a:focus {
+  height: clamp(34px, 7.2vh, 56px);
+  margin-bottom: clamp(3px, 0.8vh, 8px);
+}
+
+.header .navmenu ul li a i,
+.header .navmenu ul li a:focus i {
+  font-size: clamp(15px, 2.6vh, 20px);
 }
 
 @media (min-width: 992px) {
 
-  /* No desktop a pílula fica recolhida em círculo: a largura acompanha a altura. */
-  .navmenu a,
-  .navmenu a:focus {
-    max-width: 48px;
+  /* No desktop a pilula fica recolhida em circulo: a largura acompanha a altura. */
+  .header .navmenu ul li a,
+  .header .navmenu ul li a:focus {
+    max-width: clamp(34px, 7.2vh, 56px);
   }
 
-  .navmenu a:hover,
-  .navmenu .active,
-  .navmenu .active:focus {
+  .header .navmenu ul li a:hover,
+  .header .navmenu ul li.active > a,
+  .header .navmenu ul li:hover > a {
     max-width: 100%;
-  }
-}
-
-/* Janela baixa (notebook pequeno, celular deitado). */
-@media (max-height: 700px) {
-
-  .navmenu a,
-  .navmenu a:focus {
-    height: 40px;
-    margin-bottom: 4px;
-  }
-
-  .navmenu a i,
-  .navmenu a:focus i {
-    font-size: 17px;
-  }
-
-  @media (min-width: 992px) {
-
-    .navmenu a,
-    .navmenu a:focus {
-      max-width: 40px;
-    }
-
-    .navmenu a:hover,
-    .navmenu .active,
-    .navmenu .active:focus {
-      max-width: 100%;
-    }
-  }
-}
-
-@media (max-height: 560px) {
-
-  .navmenu a,
-  .navmenu a:focus {
-    height: 34px;
-    margin-bottom: 3px;
-  }
-
-  .navmenu a i,
-  .navmenu a:focus i {
-    font-size: 15px;
-  }
-
-  @media (min-width: 992px) {
-
-    .navmenu a,
-    .navmenu a:focus {
-      max-width: 34px;
-    }
-
-    .navmenu a:hover,
-    .navmenu .active,
-    .navmenu .active:focus {
-      max-width: 100%;
-    }
   }
 }
