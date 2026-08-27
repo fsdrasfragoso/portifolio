@@ -1482,11 +1482,6 @@ section,
   --icone: clamp(15px, 2.6vh, 20px);
   height: var(--pilula);
   margin-bottom: clamp(3px, 0.8vh, 8px);
-  /* O tema usava padding fixo de 18px. Quando a pilula encolhe, o icone fica
-     jogado para a direita dentro da bolinha. Amarrando o padding ao tamanho da
-     pilula, a sobra e sempre igual dos dois lados e o icone fica no centro. */
-  padding-left: calc((var(--pilula) - var(--icone)) / 2);
-  padding-right: calc((var(--pilula) - var(--icone)) / 2);
 }
 
 .header .navmenu ul li a i,
@@ -1502,10 +1497,16 @@ section,
 
 @media (min-width: 992px) {
 
-  /* No desktop a pilula fica recolhida em circulo: a largura acompanha a altura. */
+  /* No desktop a pilula fica recolhida em circulo: a largura acompanha a altura.
+     O tema deixava padding fixo de 18px a esquerda, e por isso o icone saia do
+     centro assim que a bolinha encolhia. Sem padding e com o conteudo
+     centralizado, o icone fica no meio em qualquer tamanho. */
   .header .navmenu ul li a,
   .header .navmenu ul li a:focus {
-    max-width: clamp(34px, 7.2vh, 56px);
+    max-width: var(--pilula);
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
   }
 
   .header .navmenu ul li a:hover,
