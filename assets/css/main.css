@@ -1478,13 +1478,26 @@ section,
 
 .header .navmenu ul li a,
 .header .navmenu ul li a:focus {
-  height: clamp(34px, 7.2vh, 56px);
+  --pilula: clamp(34px, 7.2vh, 56px);
+  --icone: clamp(15px, 2.6vh, 20px);
+  height: var(--pilula);
   margin-bottom: clamp(3px, 0.8vh, 8px);
+  /* O tema usava padding fixo de 18px. Quando a pilula encolhe, o icone fica
+     jogado para a direita dentro da bolinha. Amarrando o padding ao tamanho da
+     pilula, a sobra e sempre igual dos dois lados e o icone fica no centro. */
+  padding-left: calc((var(--pilula) - var(--icone)) / 2);
+  padding-right: calc((var(--pilula) - var(--icone)) / 2);
 }
 
 .header .navmenu ul li a i,
 .header .navmenu ul li a:focus i {
-  font-size: clamp(15px, 2.6vh, 20px);
+  font-size: var(--icone);
+  /* Largura fixa: o desenho de cada icone tem largura propria, e sem isso o
+     centro visual muda de item para item. */
+  flex: 0 0 auto;
+  width: var(--icone);
+  text-align: center;
+  line-height: 1;
 }
 
 @media (min-width: 992px) {
@@ -1499,4 +1512,24 @@ section,
   .header .navmenu ul li:hover > a {
     max-width: 100%;
   }
+}
+
+/*--------------------------------------------------------------
+# Nunca pode aparecer barra de rolagem horizontal
+--------------------------------------------------------------*/
+/* Entre 1200px e 1600px o tema puxa o hero 160px para a esquerda e lhe da
+   width: 100vw. Mas 100vw conta a largura da barra de rolagem vertical, entao
+   o hero ficava mais largo que a area visivel e a pagina ganhava uma barra
+   horizontal. A largura certa e a do proprio main mais os 160px puxados: isso
+   e medido em porcentagem, que ja desconta a barra. */
+@media (min-width: 1200px) and (max-width: 1600px) {
+
+  .header~main .hero {
+    width: calc(100% + 160px);
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
