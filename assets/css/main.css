@@ -1498,14 +1498,13 @@ section,
 @media (min-width: 992px) {
 
   /* No desktop a pilula fica recolhida em circulo: a largura acompanha a altura.
-     O tema deixava padding fixo de 18px a esquerda, e por isso o icone saia do
-     centro assim que a bolinha encolhia. Sem padding e com o conteudo
-     centralizado, o icone fica no meio em qualquer tamanho. */
+     O tema alinhava o conteudo a esquerda, entao o icone saia do centro assim
+     que a bolinha encolhia (o padding continuava 18px). Centralizando o
+     conteudo, o padding igual dos dois lados deixa o icone no meio em
+     qualquer tamanho. */
   .header .navmenu ul li a,
   .header .navmenu ul li a:focus {
     max-width: var(--pilula);
-    padding-left: 0;
-    padding-right: 0;
     justify-content: center;
   }
 
